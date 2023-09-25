@@ -1,0 +1,5 @@
+INFO:tests:START SMALL SIZE
+INFO:sensors:{'podpresent': False, 'smallbuttonpressed': True, 'medbuttonpressed': False, 'largebuttonpressed': False, 'startbuttonpressed': False, 'watertemp': 65, 'unix_time': 1694970169.194562, 'midnight_time': 46969.194562}
+INFO:transitions.core:Finished processing state empty exit callbacks.
+INFO:transitions.core:Finished processing state size_is_selected enter callbacks.
+INFO:sensors:{'podpresent': True, 'smallbuttonpressed': True, 'medbuttonpressed': False, 'largebuttonpressed': False, 'startbuttonpressed': False, 'watertemp': 65, 'unix_time': 1694970170.194562, 'midnight_time': 46970.194562}
