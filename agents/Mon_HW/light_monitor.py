@@ -54,11 +54,10 @@ class LightMonitor(Monitor):
             #  for the LightBehavior based on this calculation
 
             # BEGIN STUDENT CODE
-            ts = self.sensors.get_time()
-            te = self.mtime
+            current_time = self.mtime
             nextMid = 3600*24
-            amb_light = self.non_lighting_ambient_insolation(ts, nextMid)
-            time_left = self.lighting_time_left(te)
+            amb_light = self.non_lighting_ambient_insolation(current_time, nextMid)
+            time_left = self.lighting_time_left(current_time)
             light_left = self.target - amb_light - self.insolation
             total_light = light_left // time_left
             optimal["light_level"] = [total_light - 10,total_light + 10]
