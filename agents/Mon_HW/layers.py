@@ -20,11 +20,19 @@ class BehavioralLayer:
 
     def startBehavior(self,name):
         # BEGIN STUDENT CODE
+        behavior = self.getBehavior(name)
+        if behavior and not self.isEnabled(behavior):
+            behavior.start()
+            self.enabled.append(behavior)
         # END STUDENT CODE
         pass
 
     def pauseBehavior(self,name):
         # BEGIN STUDENT CODE
+        behavior = self.getBehavior(name)
+        if behavior and self.isEnabled(behavior):
+            behavior.pause()
+            self.enabled.remove(behavior)
         # END STUDENT CODE
         pass
 
@@ -37,6 +45,8 @@ class BehavioralLayer:
             self.startBehavior(behavior.name)
 
     #more functions? write them here!
+    # BEGIN SANITIZE ALL
+    # END SANITIZE ALL
 
 class ExecutiveLayer:
 
@@ -45,6 +55,9 @@ class ExecutiveLayer:
         self.laststep = -1
         self.monitors = []
         # Initialize any extra variables here
+        # BEGIN SANITIZE ALL
+        self.enabledBehaviors = []
+        # END SANITIZE ALL
 
     def setPlanningLayer(self, planning):
         self.planning = planning
@@ -63,12 +76,11 @@ class ExecutiveLayer:
             if (m.name == name): return m
         return None
 
-    def setMonitors(self, sensors, actuator_state, monitorsList):
+    def setMonitors(self, sensors, monitorsList):
         self.monitors = monitorsList
         now = sensors.getTime()
         for monitor in self.monitors:
             monitor.setSensors(sensors)
-            monitor.setActuatorState(actuator_state)
             monitor.setExecutive(self)
             monitor.last_time = now
             monitor.dt = 0
@@ -78,6 +90,27 @@ class ExecutiveLayer:
         # NOTE: Disable any behaviors that need to be disabled
         #   before enabling any new behaviors
         # BEGIN STUDENT CODE
+        currTimeInMins = t / 60
+        # First disable any behaviors that need to be disabled
+        for behavior, times in self.schedule.items():
+            if (behavior in self.enabledBehaviors):
+                stillEnabled = False
+                for startTime, endTime in times:
+                    if startTime <= currTimeInMins and currTimeInMins < endTime:
+                        stillEnabled = True
+                        break
+                if (not stillEnabled):
+                    self.enabledBehaviors.remove(behavior)
+                    self.behavioral.pauseBehavior(behavior)
+
+        # Now enable any behaviors
+        for behavior, times in self.schedule.items():
+            if (not behavior in self.enabledBehaviors):
+                for startTime, endTime in times:
+                    if startTime <= currTimeInMins and currTimeInMins < endTime:
+                        self.enabledBehaviors.append(behavior)
+                        self.behavioral.startBehavior(behavior)
+                        break
         # END STUDENT CODE
         for monitor in self.monitors:
             monitor.doMonitor()
