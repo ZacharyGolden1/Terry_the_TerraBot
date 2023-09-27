@@ -10,6 +10,7 @@ class LoggingMonitor(Monitor):
 
     def perceive(self):
         # BEGIN STUDENT CODE
+        self.sensordata = self.sensordata
         # END STUDENT CODE
         pass
 
