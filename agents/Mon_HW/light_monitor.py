@@ -61,7 +61,7 @@ class LightMonitor(Monitor):
             time_left = self.lighting_time_left(te)
             light_left = self.target - amb_light - self.insolation
             total_light = light_left // time_left
-            optimal["light_level"] = [total_light - 25,total_light + 25]
+            optimal["light_level"] = [total_light - 10,total_light + 10]
             # END STUDENT CODE
             pass
 
