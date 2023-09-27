@@ -1,4 +1,5 @@
 from monitor import *
+import logging as lg
 
 class LoggingMonitor(Monitor):
 
@@ -6,10 +7,12 @@ class LoggingMonitor(Monitor):
         super(LoggingMonitor, self).__init__("LoggingMonitor", period)
         # Put any iniitialization code here
         # BEGIN STUDENT CODE
+        self.logger = lg.getLogger("Terry_Monitor")
         # END STUDENT CODE
 
     def perceive(self):
         # BEGIN STUDENT CODE
+        
         # END STUDENT CODE
         pass
 
