@@ -12,7 +12,6 @@ def readSchedule(file):
     sched = {}
     with open(file,"r") as f:
         for line in f:
-            if (line[0] == '#'): continue
             parts = re.split('[\t \-\n]', line.strip("\n"))
             if (len(parts) == 1): pass
             elif (len(parts) != 3):
