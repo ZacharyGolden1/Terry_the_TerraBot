@@ -36,6 +36,8 @@ class LightMonitor(Monitor):
 
     def perceive(self):
         # BEGIN STUDENT CODE
+        light_data = (self.sensordata["light"] // 3600)*self.dt
+        self.insolation += light_data
         # END STUDENT CODE
         pass
 
@@ -52,6 +54,14 @@ class LightMonitor(Monitor):
             #  for the LightBehavior based on this calculation
 
             # BEGIN STUDENT CODE
+            ts = self.sensors.get_time()
+            te = self.mtime
+            nextMid = 3600*24
+            amb_light = self.non_lighting_ambient_insolation(te, nextMid)
+            time_left = self.lighting_time_left(te)
+            light_left = self.target - amb_light - self.insolation
+            total_light = light_left // time_left
+            optimal["light_level"] = [total_light - 50,total_light + 50]
             # END STUDENT CODE
             pass
 
