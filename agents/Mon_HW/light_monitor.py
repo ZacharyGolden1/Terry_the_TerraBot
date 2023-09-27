@@ -57,7 +57,7 @@ class LightMonitor(Monitor):
             ts = self.sensors.get_time()
             te = self.mtime
             nextMid = 3600*24
-            amb_light = self.non_lighting_ambient_insolation(te, nextMid)
+            amb_light = self.non_lighting_ambient_insolation(ts, nextMid)
             time_left = self.lighting_time_left(te)
             light_left = self.target - amb_light - self.insolation
             total_light = light_left // time_left
