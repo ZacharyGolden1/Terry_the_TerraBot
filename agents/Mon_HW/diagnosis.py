@@ -28,21 +28,57 @@ def create_working_relations(model, variables):
 
 def create_connected_relations(model, variables):
     # BEGIN STUDENT CODE
+    connected_relations = [
+    connected("H-T0", "Sensor-Board0"),
+    connected("Light0", "Sensor-Board0"),
+    connected("Moisture0", "Sensor-Board0"),
+    connected("H-T1", "Sensor-Board1"),
+    connected("Light1", "Sensor-Board1"),
+    connected("Moisture1", "Sensor-Board1"),
+    connected("Sensor-Board0", "Arduino"),
+    connected("Sensor-Board1", "Arduino"),
+    connected("Wlevel", "Arduino"),
+    connected("Arduino", "Power-Board"),
+    connected("Arduino", "Rasp-Pi"),
+    connected("Rasp-Pi", "Arduino"),
+    connected("Power-Board", "Fans"),
+    connected("Power-Board", "Pump"),
+    connected("Outlet", "Rasp-Pi"),
+    connected("Outlet", "Power-Board"),
+    connected("Power-Board", "LEDs")
+]
+    create_relations(connected_relations, model, variables)
+   
+   
+   
+   
     # END STUDENT CODE
     pass
 
 def create_powered_relations(model, variables):
     # BEGIN STUDENT CODE
+    powerRelations = [powered('Outlet'), powered('Rasp-Pi'),powered('Rasp-Pi'),powered('Power-Board'),powered('Fans'),powered('LEDs'),powered('Pump')]
+   
+   
+    create_relations(powerRelations, model, variables)
+
     # END STUDENT CODE
     pass
 
 def create_signal_relations(model, variables):
     # BEGIN STUDENT CODE
+    create_relations(signal_relations, model, variables)
     # END STUDENT CODE
     pass
 
 def create_expected_result_relations(model, variables):
     # BEGIN STUDENT CODE
+    expected_result_relations = [
+    expected_result("Fans"),
+    expected_result("LEDs"),
+    expected_result("Pump")
+]
+    create_relations(expected_result_relations, model, variables)
     # END STUDENT CODE
     pass
 
@@ -88,15 +124,20 @@ def create_signal_constraints(model, variables):
 
         constraint = "IFF('%s', AND('%s', AND('%s', OR('%s', '%s'))))" %(signal(comp1,comp2), connected(comp1, comp2),
                     working(comp1), signal(comp1,comp1),
-                    rasp_pi_signal(comp2))
+                    rasp_pi_signal(comp1))
        
-        add_constraint_to_model(constraint, model, variables)
+        #add_constraint_to_model(constraint, model, variables)
     # END STUDENT CODE
+   
 
 def create_sensor_generation_constraints(model, variables):
     # BEGIN STUDENT CODE
+    for sensor in sensors:
+    constraint = "IFF('%s', '%s')" %(signal(sensor,sensor),working(sensor))
+    add_constraint_to_model(constraint, model, variables)
+   
     # END STUDENT CODE
-    pass
+   
 
 def create_expected_result_constraints(model, variables):
     # BEGIN STUDENT CODE
@@ -114,7 +155,7 @@ def create_greenhouse_model():
     variables = create_relation_variables(model)
     create_constraints(model, variables)
     return (model, variables)
-    
+   
 def collect_diagnosis(solver, variables):
     return set([var for var in variables
                 if ((var.startswith('connected') or var.startswith('working')) and
@@ -124,25 +165,41 @@ class DiagnosesCollector(cp_model.CpSolverSolutionCallback):
     def __init__(self, variables):
         cp_model.CpSolverSolutionCallback.__init__(self)
         # BEGIN STUDENT CODE
+        self.variables = variables
+        self.diagnoses = []
+       
         # END STUDENT CODE
 
     def OnSolutionCallback(self):
         # Extract the connected and working relations that are False
         # BEGIN STUDENT CODE
+        solver = cp_model.CpSolver()
+        self.diagnoses.append(collect_diagnosis(solver,self.variables))
         # END STUDENT CODE
-        pass
+       
 
 def diagnose(observations):
     model, variables = create_greenhouse_model()
     add_constraint_to_model(observations, model, variables)
 
     collector = DiagnosesCollector(variables)
-    diagnoses = []
     solver = cp_model.CpSolver()
     solver.SearchForAllSolutions(model, collector)
     # Remove all redundant diagnoses (those that are supersets
     #   of other diagnoses).
     # BEGIN STUDENT CODE
+    diagnoses = sorted(collector.diagnoses,key=len)
+    res = []
+    for dia in diagnoses:
+        flag = True
+        for item in res:
+            if dia.issupperset(res):
+                flag = False
+        if flag: res+=dia
+
+   
+    return res
+           
     # END STUDENT CODE
 
     return diagnoses

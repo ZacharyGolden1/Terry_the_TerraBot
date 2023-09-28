@@ -98,7 +98,7 @@ class TakeImage(Behavior):
     # action wrapper to take picture
     def take_pic(self):
         # relative pathname from TerraBot.py, TODO: might want to make absolute in the future
-        self.pathname = "agents/CV_HW/greenhouse_images/" + str(int(self.time)) + ".jpg"
+        self.pathname = "agents/Mon_HW/greenhouse_images/" + str(int(self.time)) + ".jpg"
         self.takePicture(self.pathname)
 
     def warning(self):
