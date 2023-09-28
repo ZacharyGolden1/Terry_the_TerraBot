@@ -83,8 +83,15 @@ def create_powered_constraints(model, variables):
 
 def create_signal_constraints(model, variables):
     # BEGIN STUDENT CODE
+    relations = [('HT-0', 'Sensor-Board0')]
+    for comp1,comp2 in relations:
+
+        constraint = "IFF('%s', AND('%s', AND('%s', OR('%s', '%s'))))" %(signal(comp1,comp2), connected(comp1, comp2),
+                    working(comp1), signal(comp1,comp1),
+                    rasp_pi_signal(comp2))
+       
+        add_constraint_to_model(constraint, model, variables)
     # END STUDENT CODE
-    pass
 
 def create_sensor_generation_constraints(model, variables):
     # BEGIN STUDENT CODE
