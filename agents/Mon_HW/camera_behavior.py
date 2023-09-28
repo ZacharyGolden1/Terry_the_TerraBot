@@ -35,30 +35,30 @@ class TakeImage(Behavior):
         self.fsm.add_transition(trigger='disable', source='*', dest='halt')
 
         # Transitions from Light
-        self.fsm.add_transition(trigger='doStep', source='light', dest='firstcheck', conditions=[
-                                "light_perfect"], after=["take_pic", "set_time_10"])
-        self.fsm.add_transition(trigger='doStep', source='light', dest='light', conditions=[
-                                "lower_light"], after=["dec_light"])
-        self.fsm.add_transition(trigger='doStep', source='light', dest='light', conditions=[
-                                "raise_light"], after=["inc_light"])
+        self.fsm.add_transition(trigger='doStep', source='light', dest='firstcheck', 
+                    conditions=["light_good"], after=["take_pic", "set_time_10"])
+        self.fsm.add_transition(trigger='doStep', source='light', dest='light', 
+                    conditions=["lower_light"], after=["dec_light"])
+        self.fsm.add_transition(trigger='doStep', source='light', dest='light', 
+                    conditions=["raise_light"], after=["inc_light"])
 
         # Transitions from First Check
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='halt', conditions=[
-                                "time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='secondcheck', conditions=[
-                                "time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
+        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='halt', 
+                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='secondcheck', 
+                    conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Second Check
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='halt', conditions=[
-                                "time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='thirdcheck', conditions=[
-                                "time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
+        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='halt', 
+                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='thirdcheck', 
+                    conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Third Check
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', conditions=[
-                                "time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', conditions=[
-                                "time_up", "no_picture_taken"], after=["warning", "lights_off"])
+        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
+                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
+                    conditions=["time_up", "no_picture_taken"], after=["warning", "lights_off"])
         # END STUDENT CODE
 
     # Add the condition and action functions
@@ -91,13 +91,11 @@ class TakeImage(Behavior):
     def dec_light(self):
         self.setLED(self.led-20)
 
-    # TODO: Should we turn off light when we halt, how does this affect other behaviors??
     def lights_off(self):
         self.setLED(0)
 
     # action wrapper to take picture
     def take_pic(self):
-        # relative pathname from TerraBot.py, TODO: might want to make absolute in the future
         self.pathname = "agents/Mon_HW/greenhouse_images/" + str(int(self.time)) + ".jpg"
         self.takePicture(self.pathname)
 

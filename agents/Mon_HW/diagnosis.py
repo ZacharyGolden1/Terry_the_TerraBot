@@ -197,9 +197,7 @@ def diagnose(observations):
                 flag = False
         if flag: res+=dia
 
-   
     return res
-           
     # END STUDENT CODE
 
     return diagnoses
