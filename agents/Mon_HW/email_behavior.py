@@ -1,166 +1,124 @@
 from behavior import *
 from transitions import Machine
-import sys, os.path as op
+import smtplib, ssl
+import json
+import smtplib
+import urllib.parse
+import urllib.request
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import lxml.html
+
+import sys
 import os
-from terrabot_utils import clock_time
-import time
-import cv2
+import os.path as op
+import glob
+
+from datetime import date
 
 '''
-The behavior should adjust the lights to a reasonable level (say 400-600),
-wait a bit for the light to stabilize, and then request an image.
-It should check to be sure the image has been recorded and, if so, process
-the image; if not, try again for up to 3 times before giving up
+The behavior should send an email that includes the team name and TerraBot
+number, the date and time, the current sensor and actuator readings, and
+the most recent image taken
 '''
-class TakeImage(Behavior):
+
+Emails = ["zwt@andrew.cmu.edu", "danielah@andrew.cmu.edu", "pphelan@andrew.cmu.edu"]
+
+class Email(Behavior):
     def __init__(self):
-        super(TakeImage, self).__init__("TakeImageBehavior")
+        super(Email, self).__init__("EmailBehavior")
         # Your code here
 	# Initialize the FSM and add transitions
         # BEGIN STUDENT CODE
-        self.pathname = ""  # pathname to image, initially empty, 
-                            # will be filled once an image is taken
-
-        self.initial = 'halt'
-        self.lastState = self.initial
-        self.states = [self.initial, 'init', 'light',
-                       '1check', "2check", "3check"]
-
-        self.fsm = Machine(self, states=self.states, initial=self.initial,
-                           ignore_invalid_triggers=True)
-        
-        self.fsm.add_transition(trigger='enable', source='halt', dest='init')
-
-        self.fsm.add_transition(trigger='doStep', source='init', dest='light')
+        self.fsm.add_transition(
+            trigger='enable', source='halt', dest='init')
+        self.fsm.add_transition(
+            trigger='doStep', source='init', dest='halt', after='send_email')
         self.fsm.add_transition(trigger='disable', source='*', dest='halt')
-
-        # Transitions from Light
-        self.fsm.add_transition(trigger='doStep', source='light', dest='firstcheck', 
-                    conditions=["light_good"], after=["take_pic", "set_time_10"])
-        self.fsm.add_transition(trigger='doStep', source='light', dest='light', 
-                    conditions=["lower_light"], after=["dec_light"])
-        self.fsm.add_transition(trigger='doStep', source='light', dest='light', 
-                    conditions=["raise_light"], after=["inc_light"])
-
-        # Transitions from First Check
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='secondcheck', 
-                    conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
-
-        # Transitions from Second Check
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='thirdcheck', 
-                    conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
-
-        # Transitions from Third Check
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
-                    conditions=["time_up", "no_picture_taken"], after=["warning", "lights_off"])
         # END STUDENT CODE
+
+    # Added, not originally in starter file
+    def enable(self):
+        print("Sending Email")
+        self.trigger("enable")
+
+    # Added, not originally in starter file
+    def disable(self):
+        self.trigger("disable")
+
+    # Added, not originally in starter file
+    def act(self):
+        self.trigger('doStep')
 
     # Add the condition and action functions
     #  Remember: if statements only in the condition functions;
     #            modify state information only in the action functions
     # BEGIN STUDENT CODE
-    def light_good(self):
-        return 450 <= self.light < 550
+    def get_image():
+        folder_path = r'agents/Mon_HW/greenhouse_images/'
+        file_type = r'\*jpg'
+        files = os.listdir("./greenhouse_images/")
+        print("files: ", files)
+        if files:
+            recent_image = "./greenhouse_images/" + max(files)
+        else:
+            recent_image = None
+        return recent_image
+    
+    def create_message(self):
+        message = "This is the Sensor Data from the TerraBot"
+        for sensor in self.sensordata:
+            s = str(sensor)
+            message += s
+            message += "\n\n"
+            message += self.sensordata[sensor]
+        
+        print("\n\nrecent_image: ", recent_image)
 
-    def raise_light(self):
-        return self.light < 450
+        recent_image = get_image()
 
-    def lower_light(self):
-        return self.light >= 550
+        msg = MIMEMultipart('related')
+        msg_alternative = MIMEMultipart('alternative')
+        msg.attach(msg_alternative)
+        part_text = MIMEText(lxml.html.fromstring(
+            message).text_content().encode('utf-8'), 'plain', _charset='utf-8')
+        part_html = MIMEText(message.encode('utf-8'), 'html', _charset='utf-8')
+        msg_alternative.attach(part_text)
+        msg_alternative.attach(part_html)
 
-    def time_up(self):
-        return self.time >= self.waittime
+        print("recent_image: ", recent_image)
+        if recent_image:
+            with open(recent_image, 'rb') as f:
+                img_data = f.read()
 
-    def picture_taken(self):
-        return op.exists(self.pathname)
+            # print("name: ", op.basename(recent_image))
+            # print("img_data: ", img_data)
+            image = MIMEImage(img_data, name=op.basename(recent_image))
+            msg.attach(image)
 
-    def no_picture_taken(self):
-        return not op.exists(self.pathname)
+        return msg
 
-    ### ACTION FUNCTIONS ###
+    def send_email():
+        port = 465  # For SSL
+        smtp_server = "smtp.gmail.com"
+        sender_email = "my@gmail.com"  # Enter your address
+        receiver_email = "your@gmail.com"  # Enter receiver address
+        password = "TerraBot"
+        message = create_message(self)
 
-    def inc_light(self):
-        self.setLED(self.led+20)
-
-    def dec_light(self):
-        self.setLED(self.led-20)
-
-    def lights_off(self):
-        self.setLED(0)
-
-    # action wrapper to take picture
-    def take_pic(self):
-        self.pathname = "agents/Mon_HW/greenhouse_images/" + str(int(self.time)) + ".jpg"
-        self.takePicture(self.pathname)
-
-    def warning(self):
-        print("WARNING: Image Capture Failed")
-
-    # action wrapper to process image
-    def proc_image(self):
-        self.proc_image(self.pathname)
-
-    def set_time(self, wait):
-        self.waittime = self.time + wait
-        print("setTimer: %d (%d)" % (self.waittime, wait))
-
-    def set_time_10(self): self.set_time(10)
-    def set_time_20(self): self.set_time(20)
-    # END STUDENT CODE
-
-    # Added, not originally in starter file
-    def setInitial(self):
-        self.led = 0
-        self.setLED(self.led)
-
-    # Added, not originally in starter file
-    def enable(self):
-        # Use 'enable' trigger to transition the FSM out of the 'initial' state
-        self.setInitial()
-        self.trigger("enable")
-
-    # Added, not originally in starter file
-    def disable(self):
-        # Use 'diable' trigger to transition the FSM into the 'initial' state
-        self.setInitial()
-        self.trigger("disable")
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(smtp_server, port, context=context) as server:
+            server.login(sender_email, password)
+            for receiver_email in Emails:
+                server.sendmail(sender_email, receiver_email, message)
+            # END STUDENT CODE
 
     def perceive(self):
         self.time = self.sensordata['unix_time']
         # Add any sensor data variables you need for the behavior
         # BEGIN STUDENT CODE
-        self.light = self.sensordata["light"]
         # END STUDENT CODE
 
     def act(self):
         self.trigger("doStep")
-        if (self.lastState != self.state):
-            print("Transitioning to %s" % self.state)
-            self.lastState = self.state
 
-    # Added, not originally in starter file
-    def takePicture(self, path_name):
-        self.actuators.doActions((self.name, self.sensors.getTime(),
-                                  {"camera": path_name}))
-
-    # Added, not originally in starter file
-    def setLED(self, level):
-        self.led = max(0, min(255, level))
-        self.actuators.doActions((self.name, self.sensors.getTime(),
-                                  {"led": self.led}))
-
-    # Added, not originally in starter file
-    def processImage(self, image):
-        foliage_mask = classifyFoliage(image)
-        size = image.shape[0]*image.shape[1]
-        percentage = cv2.countNonZero(foliage_mask)/size
-        height = measureHeight(foliage_mask)
-        print("As of %s, %.1f%% of pixels are foliage; plant height is %.1fcm"
-              % (clock_time(self.time), 100*percentage,
-                 (0 if not height else height)))
