@@ -48,18 +48,18 @@ def create_connected_relations(model, variables):
     connected("Power-Board", "LEDs")
 ]
     create_relations(connected_relations, model, variables)
-   
-   
-   
-   
+    
+    
+    
+    
     # END STUDENT CODE
     pass
 
 def create_powered_relations(model, variables):
     # BEGIN STUDENT CODE
     powerRelations = [powered('Outlet'), powered('Rasp-Pi'),powered('Rasp-Pi'),powered('Power-Board'),powered('Fans'),powered('LEDs'),powered('Pump')]
-   
-   
+    
+    
     create_relations(powerRelations, model, variables)
 
     # END STUDENT CODE
@@ -248,16 +248,16 @@ def create_signal_constraints(model, variables):
        
     
     # END STUDENT CODE
-    pass
+    
 
 def create_sensor_generation_constraints(model, variables):
-    # BEGIN STUDENT CODE 
+    # BEGIN STUDENT CODE
     for sensor in sensors:
     	constraint = "IFF('%s', '%s')" %(signal(sensor,sensor),working(sensor))
     	add_constraint_to_model(constraint, model, variables)
     
     # END STUDENT CODE
-    pass
+    
 
 def create_expected_result_constraints(model, variables):
     # BEGIN STUDENT CODE
@@ -299,7 +299,7 @@ def create_greenhouse_model():
     variables = create_relation_variables(model)
     create_constraints(model, variables)
     return (model, variables)
-   
+    
 def collect_diagnosis(solver, variables):
     return set([var for var in variables
                 if ((var.startswith('connected') or var.startswith('working')) and
@@ -319,7 +319,7 @@ class DiagnosesCollector(cp_model.CpSolverSolutionCallback):
         # BEGIN STUDENT CODE
         self.diagnoses.append(collect_diagnosis(self,self.variables))
         # END STUDENT CODE
-        pass
+        
 
 def diagnose(observations):
     model, variables = create_greenhouse_model()
@@ -340,4 +340,6 @@ def diagnose(observations):
                 flag = False
         if flag: res+=[dia]
 
-    return diagnoses
+    
+    return res
+           
