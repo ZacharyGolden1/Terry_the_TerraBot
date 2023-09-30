@@ -44,19 +44,19 @@ class TakeImage(Behavior):
 
         # Transitions from First Check
         self.fsm.add_transition(trigger='doStep', source='1check', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+                    conditions=["time_up", "picture_taken"], after=["lights_off"])
         self.fsm.add_transition(trigger='doStep', source='1check', dest='2check', 
                     conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Second Check
         self.fsm.add_transition(trigger='doStep', source='2check', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+                    conditions=["time_up", "picture_taken"], after=["lights_off"])
         self.fsm.add_transition(trigger='doStep', source='2check', dest='3check', 
                     conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Third Check
         self.fsm.add_transition(trigger='doStep', source='3check', dest='halt', 
-                    conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
+                    conditions=["time_up", "picture_taken"], after=["lights_off"])
         self.fsm.add_transition(trigger='doStep', source='3check', dest='halt', 
                     conditions=["time_up", "no_picture_taken"], after=["warning", "lights_off"])
         # END STUDENT CODE
@@ -101,10 +101,6 @@ class TakeImage(Behavior):
 
     def warning(self):
         print("WARNING: Image Capture Failed")
-
-    # action wrapper to process image
-    def proc_image(self):
-        self.proc_image(self.pathname)
 
     def set_time(self, wait):
         self.waittime = self.time + wait
@@ -154,13 +150,3 @@ class TakeImage(Behavior):
         self.led = max(0, min(255, level))
         self.actuators.doActions((self.name, self.sensors.getTime(),
                                   {"led": self.led}))
-
-    # Added, not originally in starter file
-    def processImage(self, image):
-        foliage_mask = classifyFoliage(image)
-        size = image.shape[0]*image.shape[1]
-        percentage = cv2.countNonZero(foliage_mask)/size
-        height = measureHeight(foliage_mask)
-        print("As of %s, %.1f%% of pixels are foliage; plant height is %.1fcm"
-              % (clock_time(self.time), 100*percentage,
-                 (0 if not height else height)))
