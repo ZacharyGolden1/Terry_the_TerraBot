@@ -67,6 +67,7 @@ class Email(Behavior):
     
     def create_message(self):
         message = "This is the Sensor Data from the TerraBot"
+        message += ""
         for sensor in self.sensordata:
             s = str(sensor)
             message += s
