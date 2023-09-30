@@ -64,7 +64,7 @@ class LightMonitor(Monitor):
             total_light = light_left // time_left
 
             current_optimal = [total_light - 10,total_light + 10]
-            self.lightBehavior.newOptimal(current_optimal)
+            self.current_optimal = current_optimal
             # END STUDENT CODE
             pass
 
