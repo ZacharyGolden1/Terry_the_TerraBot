@@ -114,9 +114,6 @@ def output_input_adder(out_bit_values):
 
 
 
-   
-
-
 class SolutionCollector(cp_model.CpSolverSolutionCallback):
     solutions = []
     def __init__(self, a_bits, b_bits):

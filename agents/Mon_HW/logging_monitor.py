@@ -1,4 +1,5 @@
 from monitor import *
+import logging as lg
 import os
 from datetime import datetime 
 class LoggingMonitor(Monitor):
@@ -7,11 +8,13 @@ class LoggingMonitor(Monitor):
         super(LoggingMonitor, self).__init__("LoggingMonitor", period)
         # Put any iniitialization code here
         # BEGIN STUDENT CODE
+        self.logger = lg.getLogger("Terry_Monitor")
         self.filename = None
         # END STUDENT CODE
 
     def perceive(self):
         # BEGIN STUDENT CODE
+        
         self.sensordata =  self.sensordata
         self.time = self.sensordata['unix_time']
         self.actuator_state =  self.actuator_state

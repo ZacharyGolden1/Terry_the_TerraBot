@@ -1,6 +1,7 @@
 import rospy, ros_hardware, layers
 import sys, os, select, time
 from terrabot_utils import time_since_midnight
+from monitor import *
 
 import greenhouse_behaviors as gb
 import ping_behavior as ping
@@ -81,6 +82,7 @@ class LayeredGreenhouseAgent:
         self.executive.setPlanningLayer(layers.PlanningLayer(schedulefile))
         self.executive.planning.setExecutive(self.executive)
         self.executive.planning.getNewSchedule()
+        self.executive.setMonitors(self.sensors, self.actuators.actuator state, [logging monitor.LoggingMonitor()])
         self.behavioral.startBehavior("PingBehavior")
         self.executive.setMonitors(self.sensors, self.actuators.actuator_state,
                                    [lm.LightMonitor(),log_mon.LoggingMonitor()])
