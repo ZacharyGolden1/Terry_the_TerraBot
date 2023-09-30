@@ -4,6 +4,8 @@ from terrabot_utils import time_since_midnight
 
 import greenhouse_behaviors as gb
 import ping_behavior as ping
+import light_monitor as lm
+import logging_monitor as log_mon
 
 def init_ros(sim, name):
     if sim: rospy.set_param('use_sim_time', True)
@@ -80,6 +82,8 @@ class LayeredGreenhouseAgent:
         self.executive.planning.setExecutive(self.executive)
         self.executive.planning.getNewSchedule()
         self.behavioral.startBehavior("PingBehavior")
+        self.executive.setMonitors(self.sensors, self.actuators.actuator_state,
+                                   [lm.LightMonitor(),log_mon.LoggingMonitor()])
         # END STUDENT CODE
 
     def main(self):
