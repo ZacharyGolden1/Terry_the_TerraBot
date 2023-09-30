@@ -35,7 +35,7 @@ class TakeImage(Behavior):
         self.fsm.add_transition(trigger='disable', source='*', dest='halt')
 
         # Transitions from Light
-        self.fsm.add_transition(trigger='doStep', source='light', dest='firstcheck', 
+        self.fsm.add_transition(trigger='doStep', source='light', dest='1check', 
                     conditions=["light_good"], after=["take_pic", "set_time_10"])
         self.fsm.add_transition(trigger='doStep', source='light', dest='light', 
                     conditions=["lower_light"], after=["dec_light"])
@@ -43,21 +43,21 @@ class TakeImage(Behavior):
                     conditions=["raise_light"], after=["inc_light"])
 
         # Transitions from First Check
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='halt', 
+        self.fsm.add_transition(trigger='doStep', source='1check', dest='halt', 
                     conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='firstcheck', dest='secondcheck', 
+        self.fsm.add_transition(trigger='doStep', source='1check', dest='2check', 
                     conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Second Check
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='halt', 
+        self.fsm.add_transition(trigger='doStep', source='2check', dest='halt', 
                     conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='secondcheck', dest='thirdcheck', 
+        self.fsm.add_transition(trigger='doStep', source='2check', dest='3check', 
                     conditions=["time_up", "no_picture_taken"], after=["take_pic", "set_time_20"])
 
         # Transitions from Third Check
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
+        self.fsm.add_transition(trigger='doStep', source='3check', dest='halt', 
                     conditions=["time_up", "picture_taken"], after=["proc_image", "lights_off"])
-        self.fsm.add_transition(trigger='doStep', source='thirdcheck', dest='halt', 
+        self.fsm.add_transition(trigger='doStep', source='3check', dest='halt', 
                     conditions=["time_up", "no_picture_taken"], after=["warning", "lights_off"])
         # END STUDENT CODE
 
