@@ -36,6 +36,8 @@ class LightMonitor(Monitor):
 
     def perceive(self):
         # BEGIN STUDENT CODE
+        self.mtime = self.sensordata["midnight_time"]
+        self.time = self.sensordata["unix_time"]
         light_data = (self.sensordata["light"] // 3600)*self.dt
         self.insolation += light_data
         # END STUDENT CODE
@@ -54,13 +56,15 @@ class LightMonitor(Monitor):
             #  for the LightBehavior based on this calculation
 
             # BEGIN STUDENT CODE
+            day_left = self.light_intervals[len(self.lighting_intervals)-1][1]
             current_time = self.mtime
-            nextMid = 3600*24
-            amb_light = self.non_lighting_ambient_insolation(current_time, nextMid)
+            amb_light = self.non_lighting_ambient_insolation(current_time, day_left)
             time_left = self.lighting_time_left(current_time)
             light_left = self.target - amb_light - self.insolation
             total_light = light_left // time_left
-            optimal["light_level"] = [total_light - 10,total_light + 10]
+
+            self.current_optimal = [total_light - 10,total_light + 10]
+            self.lightBehavior.newOptimal(self.current_optimal)
             # END STUDENT CODE
             pass
 
