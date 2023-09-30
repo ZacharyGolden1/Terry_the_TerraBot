@@ -7,6 +7,7 @@ import greenhouse_behaviors as gb
 import ping_behavior as ping
 import light_monitor as lm
 import logging_monitor as log_mon
+import camera_behavior as cb
 
 def init_ros(sim, name):
     if sim: rospy.set_param('use_sim_time', True)
@@ -74,7 +75,7 @@ class LayeredGreenhouseAgent:
         # BEGIN STUDENT CODE
         self.actuators = ros_hardware.ROSActuators()
         self.behaviors = [gb.Light(), gb.RaiseTemp(), gb.LowerTemp(), gb.LowerHumid(),
-                          gb.RaiseSMoist(), gb.LowerSMoist(), ping.Ping()]
+                          gb.RaiseSMoist(), gb.LowerSMoist(), ping.Ping(), cb.TakeImage()]
         self.behavioral = layers.BehavioralLayer(self.sensors, self.actuators, self.behaviors)
 
         self.executive = layers.ExecutiveLayer()
