@@ -63,8 +63,8 @@ class LightMonitor(Monitor):
             light_left = self.target - amb_light - self.insolation
             total_light = light_left // time_left
 
-            self.current_optimal = [total_light - 10,total_light + 10]
-            self.lightBehavior.newOptimal(self.current_optimal)
+            current_optimal = [total_light - 10,total_light + 10]
+            self.lightBehavior.newOptimal(current_optimal)
             # END STUDENT CODE
             pass
 
