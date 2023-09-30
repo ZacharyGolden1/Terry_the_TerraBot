@@ -56,8 +56,8 @@ class LightMonitor(Monitor):
             #  for the LightBehavior based on this calculation
 
             # BEGIN STUDENT CODE
-            day_left = self.light_intervals[len(self.lighting_intervals)-1][1]
             current_time = self.mtime
+            day_left = 3600*24 - current_time
             amb_light = self.non_lighting_ambient_insolation(current_time, day_left)
             time_left = self.lighting_time_left(current_time)
             light_left = self.target - amb_light - self.insolation
